@@ -1,0 +1,132 @@
+spring:
+  application:
+    name: ai-browser-agent
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:browserai}
+    username: ${DB_USERNAME:browserai}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 5000ms
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+
+  sql:
+    init:
+      mode: never
+
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-stacktrace: never
+    include-message: always
+
+# Gemini LLM
+gemini:
+  api-key: ${GEMINI_API_KEY}
+  model: ${GEMINI_MODEL:gemini-2.0-flash}
+  base-url: https://generativelanguage.googleapis.com/v1beta
+  max-tokens: 1024
+  temperature: 0.1
+  max-text-length: 8000
+
+# Encryption (AES-256 needs exactly 32 characters — MUST override ENCRYPTION_SECRET in production)
+encryption:
+  secret: ${ENCRYPTION_SECRET}
+
+# File Storage
+storage:
+  base-path: ${STORAGE_PATH:./storage}
+  local-downloads-path: ${LOCAL_DOWNLOADS_PATH:${user.home}/Downloads}
+
+# Agent Config
+agent:
+  max-retries: 3
+  download-timeout-seconds: ${DOWNLOAD_TIMEOUT:90}
+  playwright-headless: ${PLAYWRIGHT_HEADLESS:false}
+  dynamic-mode: true
+  user-agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+  viewport-width: 1366
+  viewport-height: 768
+  page-wait-ms: 2000
+  click-timeout-ms: 5000
+  cdp-timeout-seconds: 15
+  min-file-size-bytes: 512
+
+# Governance Limits (configurable for slow government portals)
+governance:
+  max-llm-calls: ${MAX_LLM_CALLS:25}
+  max-tokens: ${MAX_TOKENS:100000}
+  max-exploration-depth: ${MAX_EXPLORATION_DEPTH:15}
+  max-session-duration-ms: ${MAX_SESSION_DURATION_MS:600000}
+
+# SerpAPI (web search for portal URL discovery)
+serpapi:
+  api-key: ${SERPAPI_API_KEY}
+
+# CAPTCHA Solver Config
+captcha:
+  max-ai-retries: 3
+  manual-timeout-seconds: 120
+
+# Cache
+cache:
+  intent:
+    prefix: "intent:cache:"
+    ttl-hours: 6
+
+# Redis Lock
+redis-lock:
+  ttl-seconds: 300
+
+# Resilience4j
+resilience4j:
+  retry:
+    instances:
+      gemini:
+        max-attempts: 3
+        wait-duration: 2s
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+      portal:
+        max-attempts: 2
+        wait-duration: 3s
+  circuitbreaker:
+    instances:
+      gemini:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+
+# Logging
+logging:
+  level:
+    browserAI.demo: ${LOG_LEVEL:DEBUG}
+    org.hibernate.SQL: WARN
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
