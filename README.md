@@ -4,6 +4,10 @@ An AI-powered browser automation system built with **Spring Boot** and **Google 
 
 > **"Download my IndiGo invoice for PNR ABC123"** — and the agent figures out the rest.
 
+**Documentation:**
+- [**Interview preparation**](docs/INTERVIEW_PREP.md) — how to explain the project, architecture diagrams, flow, tech stack, and sample Q&A.
+- [**Architecture one-pager**](docs/ARCHITECTURE.md) — diagrams and quick reference.
+
 ---
 
 ## What Problem Does This Solve?
